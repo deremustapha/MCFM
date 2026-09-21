@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Cross-FM: A Cross-Species Foundation Model for Intracortical BCIs</title>
+<title>TASK-DEPENDENT EFFECTS OF CROSS-SPECIES PRETRAINING ON INTRACORTICAL DECODING</title>
 <style>
   :root {
     --bg: #fbfaf8;
@@ -207,9 +207,9 @@
 <body>
 
 <header class="hero">
-  <h1>Cross-FM: A Cross-Species Foundation Model for<br>Intracortical Brain&#8211;Computer Interfaces</h1>
+  <h1>TASK-DEPENDENT EFFECTS OF CROSS-SPECIES PRETRAINING ON<br>INTRACORTICAL DECODING</h1>
   <p class="tagline">
-    A neural foundation model &mdash; manifold-constrained hyper-connections + sparse mixture-of-experts,
+    The masked neural reconstruction foundation model (<strong>MCFM</strong>) &mdash; manifold-constrained hyper-connections + sparse mixture-of-experts,
     self-supervised across heterogeneous recording pools &mdash; evaluated on human speech (T12), human
     handwriting (H2), and non-human primate reaching (Flint) with real multi-seed statistics.
   </p>
@@ -217,7 +217,7 @@
   <p class="affils">[Institution 1] &nbsp;&middot;&nbsp; [Institution 2]</p>
   <div class="btn-row">
     <a class="btn" href="#">📄 Paper (PDF)</a>
-    <a class="btn secondary" href="https://github.com/REPLACE_ME/cross-fm">💻 Code</a>
+    <a class="btn secondary" href="https://github.com/deremustapha/MCFM">💻 Code</a>
     <a class="btn secondary" href="#datasets">🗂️ Datasets</a>
     <a class="btn secondary" href="#citation">❝ Cite</a>
   </div>
@@ -240,7 +240,7 @@
     <p class="lead">
       Building a single neural network that transfers usefully across species, tasks, and recording
       hardware is a central open problem for intracortical brain&#8211;computer interfaces (iBCIs). We
-      present <strong>Cross-FM</strong>, a compact encoder that combines manifold-constrained
+      present <strong>MCFM</strong> (masked neural reconstruction foundation model), a compact encoder that combines manifold-constrained
       hyper-connections (mHC) in place of standard residual connections with a sparse
       mixture-of-experts (MoE) feed-forward sublayer, pretrained via masked reconstruction across
       five heterogeneous neural-data pools. We evaluate transfer on three held-out downstream
@@ -263,7 +263,7 @@
   <section id="method">
     <h2>Method</h2>
     <p>
-      Cross-FM tokenizes raw multi-channel neural activity into fixed-width patches, encodes them
+      MCFM tokenizes raw multi-channel neural activity into fixed-width patches, encodes them
       with a stack of blocks that route each sublayer's residual connection through a
       Sinkhorn-constrained hyper-connection instead of a plain skip, and pretrains the whole stack
       with a masked-reconstruction objective across five pretraining pools (A&ndash;E).
@@ -328,6 +328,17 @@
       <div class="stat-card"><div class="num">0.270 PER</div><div class="label">Best T12 &mdash; pool E, 45M. Scales cleanly &amp; monotonically with size, variance shrinking as size grows</div></div>
       <div class="stat-card"><div class="num">96.5%</div><div class="label">Best H2 &mdash; pool C, 6M. Already near ceiling at the smallest size; larger models don't help</div></div>
       <div class="stat-card"><div class="num">0.727 R&sup2;</div><div class="label">Best Flint &mdash; pool D, 10M. Jumps 6M&rarr;10M, then plateaus at 45M</div></div>
+    </div>
+    <div class="panel" style="margin-top:18px;">
+      <img
+        src="https://github.com/user-attachments/assets/12fbd4a8-ab97-4891-a493-fde92e8ce7f3"
+        alt="Scaling and pairwise transfer effects across speech decoding, handwriting, and NHP reaching."
+        style="width:100%;height:auto;border-radius:10px;"
+      />
+      <p class="table-caption" style="margin-bottom:0;">
+        Summary figure: scaling trends (top) and pairwise transfer effects (bottom) for MCFM across
+        T12 speech decoding, H2 handwriting classification, and Flint NHP reaching.
+      </p>
     </div>
 
     <h3 style="margin-top:36px;font-size:1.1rem;">Full sweep: Scratch vs. every pretraining pool</h3>
@@ -428,9 +439,9 @@
 
   <section id="citation">
     <h2>Citation</h2>
-    <p>If you use Cross-FM, please cite:</p>
-    <pre><code>@article{crossfm2026,
-  title   = {Cross-FM: A Cross-Species Foundation Model for Intracortical Brain-Computer Interfaces},
+    <p>If you use MCFM, please cite:</p>
+    <pre><code>@article{mcfm2026,
+  title   = {TASK-DEPENDENT EFFECTS OF CROSS-SPECIES PRETRAINING ON INTRACORTICAL DECODING},
   author  = {[Author One] and [Author Two] and [Author Three]},
   journal = {[Venue / arXiv]},
   year    = {2026}
@@ -441,7 +452,7 @@
 
 <footer>
   Project page adapted from the standard academic-project-page template.
-  &nbsp;&middot;&nbsp; <a href="https://github.com/REPLACE_ME/cross-fm">Code</a>
+  &nbsp;&middot;&nbsp; <a href="https://github.com/deremustapha/MCFM">Code</a>
   &nbsp;&middot;&nbsp; <a href="#">Paper</a>
 </footer>
 
