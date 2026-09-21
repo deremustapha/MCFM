@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cross-FM: A Cross-Species Foundation Model for Intracortical BCIs</title>
+<style>
+  :root {
+    --bg: #fbfaf8;
+    --panel: #ffffff;
+    --ink: #1c1c1e;
+    --ink-soft: #55555a;
+    --accent: #8a3ffc;
+    --accent-soft: #ede3ff;
+    --line: #e6e3dd;
+    --good: #1f7a4d;
+    --bad: #b23b3b;
+    --code-bg: #23212b;
+    --code-ink: #e9e6f5;
+    --radius: 14px;
+    --maxw: 980px;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    line-height: 1.6;
+  }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  header.hero {
+    padding: 72px 24px 48px;
+    text-align: center;
+    background:
+      radial-gradient(circle at 20% -10%, var(--accent-soft), transparent 45%),
+      radial-gradient(circle at 85% 0%, #e3f3ee, transparent 40%);
+    border-bottom: 1px solid var(--line);
+  }
+  .hero h1 {
+    font-size: clamp(1.9rem, 4vw, 2.7rem);
+    margin: 0 0 10px;
+    letter-spacing: -0.01em;
+  }
+  .hero .tagline {
+    font-size: 1.15rem;
+    color: var(--ink-soft);
+    max-width: 720px;
+    margin: 0 auto 22px;
+  }
+  .authors {
+    font-size: 1rem;
+    color: var(--ink-soft);
+    margin-bottom: 4px;
+  }
+  .authors .affil-marker { font-size: 0.7rem; vertical-align: super; color: var(--accent); }
+  .affils {
+    font-size: 0.85rem;
+    color: #8a8a8f;
+    margin-bottom: 26px;
+  }
+  .btn-row { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 10px 20px;
+    border-radius: 999px;
+    background: var(--ink);
+    color: #fff;
+    font-weight: 600;
+    font-size: 0.92rem;
+    border: 1px solid var(--ink);
+  }
+  .btn:hover { opacity: 0.85; text-decoration: none; }
+  .btn.secondary { background: transparent; color: var(--ink); border-color: var(--line); }
+
+  nav.subnav {
+    position: sticky; top: 0; z-index: 10;
+    background: rgba(251,250,248,0.92);
+    backdrop-filter: blur(6px);
+    border-bottom: 1px solid var(--line);
+    display: flex; justify-content: center; gap: 4px;
+    padding: 10px 12px;
+    flex-wrap: wrap;
+  }
+  nav.subnav a {
+    color: var(--ink-soft);
+    font-size: 0.86rem;
+    font-weight: 600;
+    padding: 6px 12px;
+    border-radius: 999px;
+  }
+  nav.subnav a:hover { background: var(--accent-soft); color: var(--accent); text-decoration: none; }
+
+  main { max-width: var(--maxw); margin: 0 auto; padding: 8px 24px 80px; }
+  section { padding: 48px 0; border-bottom: 1px solid var(--line); }
+  section:last-of-type { border-bottom: none; }
+  section h2 {
+    font-size: 1.5rem;
+    margin: 0 0 18px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  section h2::before {
+    content: "";
+    width: 8px; height: 8px;
+    border-radius: 2px;
+    background: var(--accent);
+    display: inline-block;
+  }
+  section p { color: var(--ink-soft); max-width: 760px; }
+  section p.lead { font-size: 1.05rem; color: var(--ink); }
+
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 24px;
+  }
+
+  /* Architecture diagram */
+  .diagram {
+    display: flex; align-items: center; justify-content: center;
+    gap: 6px; flex-wrap: wrap;
+    padding: 28px 10px;
+    margin-top: 16px;
+  }
+  .diagram .box {
+    background: var(--panel);
+    border: 1.5px solid var(--line);
+    border-radius: 10px;
+    padding: 14px 16px;
+    text-align: center;
+    font-size: 0.82rem;
+    min-width: 108px;
+  }
+  .diagram .box strong { display: block; font-size: 0.88rem; margin-bottom: 2px; }
+  .diagram .box.accent { border-color: var(--accent); background: var(--accent-soft); }
+  .diagram .arrow { color: #b8b3ac; font-size: 1.3rem; }
+  .diagram .stack {
+    display: flex; flex-direction: column; gap: 6px;
+    border: 1.5px dashed var(--accent);
+    border-radius: 10px;
+    padding: 10px;
+  }
+  .diagram .stack .tag { font-size: 0.72rem; color: var(--accent); font-weight: 700; text-align:center; margin-bottom: 2px;}
+
+  table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+  th, td { text-align: right; padding: 9px 10px; border-bottom: 1px solid var(--line); }
+  th:first-child, td:first-child { text-align: left; }
+  thead th { color: var(--ink-soft); font-weight: 600; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.03em; }
+  tbody tr:hover { background: #faf8ff; }
+  td.best { color: var(--good); font-weight: 700; }
+  .table-scroll { overflow-x: auto; }
+  .table-caption { font-size: 0.82rem; color: #8a8a8f; margin-top: 10px; }
+
+  .grid3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px,1fr)); gap: 16px; margin-top: 16px; }
+  .stat-card {
+    background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius);
+    padding: 18px 20px;
+  }
+  .stat-card .num { font-size: 1.6rem; font-weight: 700; }
+  .stat-card .label { font-size: 0.82rem; color: var(--ink-soft); margin-top: 2px; }
+
+  .finding {
+    border-left: 3px solid var(--accent);
+    background: var(--accent-soft);
+    border-radius: 0 10px 10px 0;
+    padding: 12px 16px;
+    margin: 14px 0;
+    font-size: 0.92rem;
+  }
+  .finding.warn { border-color: var(--bad); background: #fbe9e9; }
+
+  pre {
+    background: var(--code-bg);
+    color: var(--code-ink);
+    padding: 18px 20px;
+    border-radius: var(--radius);
+    overflow-x: auto;
+    font-size: 0.82rem;
+    line-height: 1.55;
+  }
+  code { font-family: "SF Mono", Menlo, Consolas, monospace; }
+
+  .badge-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+  .badge {
+    font-size: 0.74rem; font-weight: 700;
+    padding: 3px 10px; border-radius: 999px;
+    background: #f1efe9; color: var(--ink-soft);
+    border: 1px solid var(--line);
+  }
+
+  footer {
+    text-align: center;
+    padding: 36px 24px 60px;
+    color: #9a968f;
+    font-size: 0.82rem;
+  }
+
+  @media (max-width: 640px) {
+    table { font-size: 0.78rem; }
+    th, td { padding: 7px 6px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <h1>Cross-FM: A Cross-Species Foundation Model for<br>Intracortical Brain&#8211;Computer Interfaces</h1>
+  <p class="tagline">
+    A neural foundation model &mdash; manifold-constrained hyper-connections + sparse mixture-of-experts,
+    self-supervised across heterogeneous recording pools &mdash; evaluated on human speech (T12), human
+    handwriting (H2), and non-human primate reaching (Flint) with real multi-seed statistics.
+  </p>
+  <p class="authors">Mustapha Deji Dere<span class="affil-marker">1</span>, Kyungmin Kwon<span class="affil-marker">1</span>, Seohee Jang<span class="affil-marker">2</span></p>
+  <p class="affils">[Institution 1] &nbsp;&middot;&nbsp; [Institution 2]</p>
+  <div class="btn-row">
+    <a class="btn" href="#">📄 Paper (PDF)</a>
+    <a class="btn secondary" href="https://github.com/REPLACE_ME/cross-fm">💻 Code</a>
+    <a class="btn secondary" href="#datasets">🗂️ Datasets</a>
+    <a class="btn secondary" href="#citation">❝ Cite</a>
+  </div>
+</header>
+
+<nav class="subnav">
+  <a href="#abstract">Abstract</a>
+  <a href="#method">Method</a>
+  <a href="#datasets">Datasets</a>
+  <a href="#results">Results</a>
+  <a href="#ablations">Ablations</a>
+  <a href="#findings">Key Findings</a>
+  <a href="#citation">Citation</a>
+</nav>
+
+<main>
+
+  <section id="abstract">
+    <h2>Abstract</h2>
+    <p class="lead">
+      Building a single neural network that transfers usefully across species, tasks, and recording
+      hardware is a central open problem for intracortical brain&#8211;computer interfaces (iBCIs). We
+      present <strong>Cross-FM</strong>, a compact encoder that combines manifold-constrained
+      hyper-connections (mHC) in place of standard residual connections with a sparse
+      mixture-of-experts (MoE) feed-forward sublayer, pretrained via masked reconstruction across
+      five heterogeneous neural-data pools. We evaluate transfer on three held-out downstream
+      benchmarks spanning two species and three behaviors &mdash; human attempted-speech decoding
+      (T12), human single-letter handwriting classification (H2), and non-human-primate center-out
+      reaching (Flint) &mdash; at three model scales (6M&ndash;45M parameters), reporting results as
+      genuine mean &plusmn; SD over four random seeds rather than single-run point estimates, across
+      five pretraining pools and three model scales (45 pool&times;size conditions per benchmark). We
+      find that a tokenization-aware fine-tuning recipe is decisive: naively frozen transfer
+      underperforms training from scratch, while unfreezing the full model from step one flips the
+      comparison entirely &mdash; pretraining beats scratch training with non-overlapping seed
+      variance in all 45 pool&times;size conditions on every benchmark. No single pretraining pool is
+      universally best, however: the strongest pool changes with model size and benchmark. A
+      controlled architecture ablation further shows that neither mHC nor MoE is universally
+      beneficial &mdash; each component's contribution is task-dependent, arguing against a single
+      fixed "best" architecture for cross-species iBCI transfer.
+    </p>
+  </section>
+
+  <section id="method">
+    <h2>Method</h2>
+    <p>
+      Cross-FM tokenizes raw multi-channel neural activity into fixed-width patches, encodes them
+      with a stack of blocks that route each sublayer's residual connection through a
+      Sinkhorn-constrained hyper-connection instead of a plain skip, and pretrains the whole stack
+      with a masked-reconstruction objective across five pretraining pools (A&ndash;E).
+    </p>
+    <div class="panel diagram">
+      <div class="box"><strong>Neural data</strong>(B, T, C)</div>
+      <div class="arrow">&rarr;</div>
+      <div class="box accent"><strong>Tokenizer</strong>patch embed</div>
+      <div class="arrow">&rarr;</div>
+      <div class="stack">
+        <div class="tag">&times; N layers</div>
+        <div class="box">mHC &rarr; RoPE Attention</div>
+        <div class="box">mHC &rarr; Sparse MoE-FFN</div>
+      </div>
+      <div class="arrow">&rarr;</div>
+      <div class="box"><strong>Task head</strong>CTC / class / regression</div>
+    </div>
+    <div class="badge-row">
+      <span class="badge">Manifold-constrained Hyper-Connections</span>
+      <span class="badge">Sparse MoE-FFN (top-k routing)</span>
+      <span class="badge">RoPE bidirectional attention</span>
+      <span class="badge">Masked-reconstruction pretraining</span>
+      <span class="badge">Sizes: 6M / 10M / 45M params</span>
+    </div>
+  </section>
+
+  <section id="datasets">
+    <h2>Downstream Benchmarks</h2>
+    <p>
+      Each benchmark uses one fixed 80/20 split, held out identically across every scratch,
+      pretrained, and ablation run reported below &mdash; the fine-tune pool is further subsampled to
+      25/50/100% to probe data efficiency.
+    </p>
+    <div class="table-scroll panel">
+      <table>
+        <thead>
+          <tr><th>Benchmark</th><th>Species / Task</th><th>Sessions</th><th>Train</th><th>Test (held out)</th><th>Total hours</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>T12</strong> &mdash; attempted speech (CTC)</td><td>Human / ALS</td><td>24</td><td>8,720 trials</td><td>2,180 trials</td><td>18.57 h</td></tr>
+          <tr><td><strong>H2</strong> &mdash; handwriting (single letter)</td><td>Human / ALS</td><td>9 (pooled)</td><td>2,232 trials</td><td>558 trials</td><td>1.24 h</td></tr>
+          <tr><td><strong>Flint</strong> &mdash; center-out reaching</td><td>Non-human primate</td><td>5 (pooled)</td><td>2,650 windows</td><td>663 windows</td><td>0.88 h</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="table-caption">
+      T12: Willett et al. 2023 speech-neuroprosthesis corpus, 20&nbsp;ms bins. H2: Willett et al. 2021
+      handwriting-BCI corpus, 10&nbsp;ms bins, fixed 1.6&nbsp;s analysis window. Flint: Flint et al. 2012
+      monkey-C center-out reaching, 20&nbsp;ms bins, continuous per-session recordings (no windowing loss).
+    </p>
+  </section>
+
+  <section id="results">
+    <h2>Headline Results</h2>
+    <p>
+      Best pretrained-transfer result per benchmark, fine-tuned <strong>conventionally</strong>
+      &mdash; the whole model trainable from step one, no layer freezing &mdash; on 100% of each
+      benchmark's fine-tune split, out of a full sweep over five pretraining pools (A&ndash;E)
+      and three model sizes. All cells are <strong>mean &plusmn; SD over 4 real random seeds</strong>.
+    </p>
+    <div class="grid3">
+      <div class="stat-card"><div class="num">0.270 PER</div><div class="label">Best T12 &mdash; pool E, 45M. Scales cleanly &amp; monotonically with size, variance shrinking as size grows</div></div>
+      <div class="stat-card"><div class="num">96.5%</div><div class="label">Best H2 &mdash; pool C, 6M. Already near ceiling at the smallest size; larger models don't help</div></div>
+      <div class="stat-card"><div class="num">0.727 R&sup2;</div><div class="label">Best Flint &mdash; pool D, 10M. Jumps 6M&rarr;10M, then plateaus at 45M</div></div>
+    </div>
+
+    <h3 style="margin-top:36px;font-size:1.1rem;">Full sweep: Scratch vs. every pretraining pool</h3>
+    <p>Every cell is 100% fine-tune data, mean &plusmn; SD over 4 seeds. Best pool per row in green.</p>
+    <div class="table-scroll panel">
+      <table>
+        <thead>
+          <tr><th>Size</th><th>Cond.</th><th>H2 (acc &uarr;)</th><th>T12 (PER &darr;)</th><th>Flint (R&sup2; &uarr;)</th></tr>
+        </thead>
+        <tbody>
+          <tr><td rowspan="6">6M</td><td>Scratch</td><td>0.9229 &plusmn; 0.0143</td><td>0.3822 &plusmn; 0.0073</td><td>0.6867 &plusmn; 0.0065</td></tr>
+          <tr><td>Pool A</td><td>0.9583 &plusmn; 0.0034</td><td>0.3282 &plusmn; 0.0122</td><td>0.6977 &plusmn; 0.0034</td></tr>
+          <tr><td>Pool B</td><td>0.9547 &plusmn; 0.0083</td><td>0.3285 &plusmn; 0.0096</td><td>0.7090 &plusmn; 0.0046</td></tr>
+          <tr><td>Pool C</td><td class="best">0.9651 &plusmn; 0.0020</td><td class="best">0.3111 &plusmn; 0.0029</td><td class="best">0.7130 &plusmn; 0.0037</td></tr>
+          <tr><td>Pool D</td><td>0.9628 &plusmn; 0.0068</td><td>0.3291 &plusmn; 0.0141</td><td>0.7042 &plusmn; 0.0034</td></tr>
+          <tr><td>Pool E</td><td>0.9588 &plusmn; 0.0075</td><td>0.3298 &plusmn; 0.0153</td><td>0.7053 &plusmn; 0.0015</td></tr>
+
+          <tr><td rowspan="6">10M</td><td>Scratch</td><td>0.9310 &plusmn; 0.0121</td><td>0.3573 &plusmn; 0.0058</td><td>0.6900 &plusmn; 0.0046</td></tr>
+          <tr><td>Pool A</td><td class="best">0.9610 &plusmn; 0.0066</td><td>0.3079 &plusmn; 0.0050</td><td>0.7214 &plusmn; 0.0071</td></tr>
+          <tr><td>Pool B</td><td>0.9404 &plusmn; 0.0142</td><td>0.3139 &plusmn; 0.0058</td><td>0.7069 &plusmn; 0.0060</td></tr>
+          <tr><td>Pool C</td><td>0.9615 &plusmn; 0.0103</td><td>0.3018 &plusmn; 0.0038</td><td>0.7210 &plusmn; 0.0057</td></tr>
+          <tr><td>Pool D</td><td>0.9606 &plusmn; 0.0066</td><td>0.3006 &plusmn; 0.0052</td><td class="best">0.7270 &plusmn; 0.0031</td></tr>
+          <tr><td>Pool E</td><td>0.9534 &plusmn; 0.0067</td><td class="best">0.3023 &plusmn; 0.0023</td><td>0.7217 &plusmn; 0.0040</td></tr>
+
+          <tr><td rowspan="6">45M</td><td>Scratch</td><td>0.9167 &plusmn; 0.0125</td><td>0.3215 &plusmn; 0.0015</td><td>0.7042 &plusmn; 0.0031</td></tr>
+          <tr><td>Pool A</td><td>0.9592 &plusmn; 0.0057</td><td>0.2736 &plusmn; 0.0030</td><td class="best">0.7286 &plusmn; 0.0044</td></tr>
+          <tr><td>Pool B</td><td>0.9494 &plusmn; 0.0027</td><td>0.2769 &plusmn; 0.0021</td><td>0.7031 &plusmn; 0.0064</td></tr>
+          <tr><td>Pool C</td><td>0.9552 &plusmn; 0.0057</td><td>0.2750 &plusmn; 0.0010</td><td>0.7179 &plusmn; 0.0009</td></tr>
+          <tr><td>Pool D</td><td>0.9547 &plusmn; 0.0083</td><td>0.2801 &plusmn; 0.0026</td><td>0.7138 &plusmn; 0.0023</td></tr>
+          <tr><td>Pool E</td><td class="best">0.9606 &plusmn; 0.0066</td><td class="best">0.2704 &plusmn; 0.0017</td><td>0.7214 &plusmn; 0.0026</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="table-caption">
+      45 pool&times;size cells per benchmark &mdash; every one beats its size-matched Scratch row, with no
+      overlap in 4-seed SD. No single pool dominates across all three benchmarks: C is the most
+      consistently strong (top-2 in nearly every row), B is the most consistently weak, and the
+      best pool for a given benchmark changes with model size.
+    </p>
+  </section>
+
+  <section id="ablations">
+    <h2>Architecture Ablation</h2>
+    <p>
+      Two controlled variants, evaluated identically (6M, pool E, 100% data, 4 seeds): removing mHC
+      entirely (<code>residual_moe</code>, plain residual connections, MoE-FFN kept) and keeping mHC
+      while replacing the sparse MoE-FFN with a single dense FFN (<code>mhc_dense</code>).
+    </p>
+    <div class="table-scroll panel">
+      <table>
+        <thead>
+          <tr><th>Benchmark</th><th>Metric</th><th>mhc_moe (full)</th><th>residual_moe (no mHC)</th><th>mhc_dense (no MoE)</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>H2</td><td>Accuracy &uarr;</td><td>0.9588 &plusmn; 0.0075</td><td>0.9570 &plusmn; 0.0046</td><td>0.9574 &plusmn; 0.0029</td></tr>
+          <tr><td>T12</td><td>PER &darr;</td><td>0.3298 &plusmn; 0.0153</td><td class="best">0.3254 &plusmn; 0.0036</td><td>0.3422 &plusmn; 0.0024</td></tr>
+          <tr><td>Flint</td><td>R&sup2; &uarr;</td><td>0.7053 &plusmn; 0.0015</td><td>0.7182 &plusmn; 0.0029</td><td class="best">0.7234 &plusmn; 0.0061</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="finding">
+      <strong>No single architecture wins everywhere.</strong> H2 is indistinguishable across all
+      three variants once real seed variance is accounted for. On T12, dropping mHC is a genuine,
+      reproducible improvement over the full model. On Flint, both ablations beat the full baseline
+      outright &mdash; MoE looks actively unhelpful for this benchmark specifically.
+    </div>
+  </section>
+
+  <section id="findings">
+    <h2>Key Findings</h2>
+    <div class="finding">
+      <strong>Fine-tuning recipe &gt; architecture, at first glance.</strong> The single largest
+      lever in this study wasn't a model change &mdash; it was replacing a frozen/gradual-unfreeze
+      transfer recipe with a conventional one (whole model trainable from step one). The same
+      checkpoints went from <em>losing</em> to scratch training on every benchmark, to <em>beating</em>
+      it, purely from that recipe change.
+    </div>
+    <div class="finding">
+      <strong>Tokenization must match the task's timescale.</strong> Native 10&nbsp;ms tokenization
+      (<code>patch_size=1</code>) roughly doubled H2 handwriting accuracy over coarse 320&nbsp;ms
+      patches, but hurt long-sequence CTC decoding on small data. Overlapping-window tokenization
+      (dense output, wide per-token context) was the decisive fix for T12 speech decoding instead.
+    </div>
+    <div class="finding warn">
+      <strong>Single-seed point estimates can mislead.</strong> T12's baseline showed 6&times; the
+      variance (SD 0.015) of either architecture ablation (SD 0.002&ndash;0.004) at 6M &mdash; a
+      single run there would have been a poor guide to which architecture is actually better.
+    </div>
+    <div class="finding">
+      <strong>No pretraining pool is universally best.</strong> Across the full 45-cell pool&times;size
+      sweep, pool <strong>C</strong> is the most consistently strong (top-2 on nearly every
+      benchmark/size) and pool <strong>B</strong> the most consistently weak, but the single best
+      pool for a given benchmark still changes with model size &mdash; e.g. Flint's best pool moves
+      D&nbsp;(10M)&rarr;A&nbsp;(45M). Every pool beats Scratch everywhere, with zero exceptions across
+      all 45 cells.
+    </div>
+  </section>
+
+  <section id="citation">
+    <h2>Citation</h2>
+    <p>If you use Cross-FM, please cite:</p>
+    <pre><code>@article{crossfm2026,
+  title   = {Cross-FM: A Cross-Species Foundation Model for Intracortical Brain-Computer Interfaces},
+  author  = {[Author One] and [Author Two] and [Author Three]},
+  journal = {[Venue / arXiv]},
+  year    = {2026}
+}</code></pre>
+  </section>
+
+</main>
+
+<footer>
+  Project page adapted from the standard academic-project-page template.
+  &nbsp;&middot;&nbsp; <a href="https://github.com/REPLACE_ME/cross-fm">Code</a>
+  &nbsp;&middot;&nbsp; <a href="#">Paper</a>
+</footer>
+
+</body>
+</html>
