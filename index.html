@@ -213,7 +213,7 @@
     self-supervised across heterogeneous recording pools &mdash; evaluated on human speech (T12), human
     handwriting (H2), and non-human primate reaching (Flint) with real multi-seed statistics.
   </p>
-  <p class="authors">Mustapha Deji Dere<span class="affil-marker">1</span>, Kyungmin Kwon<span class="affil-marker">1</span>, Seohee Jang<span class="affil-marker">2</span></p>
+  <p class="authors">Mustapha Deji Dere<span class="affil-marker">1</span>, Kyungmin Kwon<span class="affil-marker">1</span>, Seohee Jang<span class="affil-marker">2</span>, Jiyeon Kang<span class="affil-marker">2</span></p>
   <p class="affils">[Institution 1] &nbsp;&middot;&nbsp; [Institution 2]</p>
   <div class="btn-row">
     <a class="btn" href="#">📄 Paper (PDF)</a>
@@ -228,7 +228,6 @@
   <a href="#method">Method</a>
   <a href="#datasets">Datasets</a>
   <a href="#results">Results</a>
-  <a href="#ablations">Ablations</a>
   <a href="#findings">Key Findings</a>
   <a href="#citation">Citation</a>
 </nav>
@@ -268,18 +267,12 @@
       Sinkhorn-constrained hyper-connection instead of a plain skip, and pretrains the whole stack
       with a masked-reconstruction objective across five pretraining pools (A&ndash;E).
     </p>
-    <div class="panel diagram">
-      <div class="box"><strong>Neural data</strong>(B, T, C)</div>
-      <div class="arrow">&rarr;</div>
-      <div class="box accent"><strong>Tokenizer</strong>patch embed</div>
-      <div class="arrow">&rarr;</div>
-      <div class="stack">
-        <div class="tag">&times; N layers</div>
-        <div class="box">mHC &rarr; RoPE Attention</div>
-        <div class="box">mHC &rarr; Sparse MoE-FFN</div>
-      </div>
-      <div class="arrow">&rarr;</div>
-      <div class="box"><strong>Task head</strong>CTC / class / regression</div>
+    <div class="panel" style="margin-top:18px;">
+      <img
+        src="https://github.com/user-attachments/assets/7b0043a7-76b6-458f-889a-1f2dcc7d9d54"
+        alt="MCFM method overview from cross-species neural tokenization through pretrained MoE encoder to task heads."
+        style="width:100%;height:auto;border-radius:10px;"
+      />
     </div>
     <div class="badge-row">
       <span class="badge">Manifold-constrained Hyper-Connections</span>
@@ -378,33 +371,6 @@
       consistently strong (top-2 in nearly every row), B is the most consistently weak, and the
       best pool for a given benchmark changes with model size.
     </p>
-  </section>
-
-  <section id="ablations">
-    <h2>Architecture Ablation</h2>
-    <p>
-      Two controlled variants, evaluated identically (6M, pool E, 100% data, 4 seeds): removing mHC
-      entirely (<code>residual_moe</code>, plain residual connections, MoE-FFN kept) and keeping mHC
-      while replacing the sparse MoE-FFN with a single dense FFN (<code>mhc_dense</code>).
-    </p>
-    <div class="table-scroll panel">
-      <table>
-        <thead>
-          <tr><th>Benchmark</th><th>Metric</th><th>mhc_moe (full)</th><th>residual_moe (no mHC)</th><th>mhc_dense (no MoE)</th></tr>
-        </thead>
-        <tbody>
-          <tr><td>H2</td><td>Accuracy &uarr;</td><td>0.9588 &plusmn; 0.0075</td><td>0.9570 &plusmn; 0.0046</td><td>0.9574 &plusmn; 0.0029</td></tr>
-          <tr><td>T12</td><td>PER &darr;</td><td>0.3298 &plusmn; 0.0153</td><td class="best">0.3254 &plusmn; 0.0036</td><td>0.3422 &plusmn; 0.0024</td></tr>
-          <tr><td>Flint</td><td>R&sup2; &uarr;</td><td>0.7053 &plusmn; 0.0015</td><td>0.7182 &plusmn; 0.0029</td><td class="best">0.7234 &plusmn; 0.0061</td></tr>
-        </tbody>
-      </table>
-    </div>
-    <div class="finding">
-      <strong>No single architecture wins everywhere.</strong> H2 is indistinguishable across all
-      three variants once real seed variance is accounted for. On T12, dropping mHC is a genuine,
-      reproducible improvement over the full model. On Flint, both ablations beat the full baseline
-      outright &mdash; MoE looks actively unhelpful for this benchmark specifically.
-    </div>
   </section>
 
   <section id="findings">
