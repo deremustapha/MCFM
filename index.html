@@ -213,8 +213,8 @@
     self-supervised across heterogeneous recording pools &mdash; evaluated on human speech (T12), human
     handwriting (H2), and non-human primate reaching (Flint) with real multi-seed statistics.
   </p>
-  <p class="authors">Mustapha Deji Dere<span class="affil-marker">1</span>, Kyungmin Kwon<span class="affil-marker">1</span>, Seohee Jang<span class="affil-marker">2</span>, Jiyeon Kang<span class="affil-marker">2</span></p>
-  <p class="affils">[Institution 1] &nbsp;&middot;&nbsp; [Institution 2]</p>
+  <p class="authors">Mustapha Deji Dere<span class="affil-marker">1</span>, Kyungmin Kwon<span class="affil-marker">1</span>, Seohee Jang<span class="affil-marker">1</span>, Jiyeon Kang<span class="affil-marker">1</span></p>
+  <p class="affils"><span class="affil-marker">1</span> Gwangju Institute of Science and Technology</p>
   <div class="btn-row">
     <a class="btn" href="#">📄 Paper (PDF)</a>
     <a class="btn secondary" href="https://github.com/deremustapha/MCFM">💻 Code</a>
@@ -237,25 +237,7 @@
   <section id="abstract">
     <h2>Abstract</h2>
     <p class="lead">
-      Building a single neural network that transfers usefully across species, tasks, and recording
-      hardware is a central open problem for intracortical brain&#8211;computer interfaces (iBCIs). We
-      present <strong>MCFM</strong> (masked neural reconstruction foundation model), a compact encoder that combines manifold-constrained
-      hyper-connections (mHC) in place of standard residual connections with a sparse
-      mixture-of-experts (MoE) feed-forward sublayer, pretrained via masked reconstruction across
-      five heterogeneous neural-data pools. We evaluate transfer on three held-out downstream
-      benchmarks spanning two species and three behaviors &mdash; human attempted-speech decoding
-      (T12), human single-letter handwriting classification (H2), and non-human-primate center-out
-      reaching (Flint) &mdash; at three model scales (6M&ndash;45M parameters), reporting results as
-      genuine mean &plusmn; SD over four random seeds rather than single-run point estimates, across
-      five pretraining pools and three model scales (45 pool&times;size conditions per benchmark). We
-      find that a tokenization-aware fine-tuning recipe is decisive: naively frozen transfer
-      underperforms training from scratch, while unfreezing the full model from step one flips the
-      comparison entirely &mdash; pretraining beats scratch training with non-overlapping seed
-      variance in all 45 pool&times;size conditions on every benchmark. No single pretraining pool is
-      universally best, however: the strongest pool changes with model size and benchmark. A
-      controlled architecture ablation further shows that neither mHC nor MoE is universally
-      beneficial &mdash; each component's contribution is task-dependent, arguing against a single
-      fixed "best" architecture for cross-species iBCI transfer.
+      Cross-species foundation models offer a potential solution to the scarcity of human intracortical recordings, yet their benefits remain inconsistent across decoding tasks. We investigate when nonhuman primate (NHP) motor recordings improve neural decoding and whether transfer depends on model capacity and target supervision. We introduce a masked neural reconstruction foundation model, a modular framework combining population tokenization, bidirectional masked reconstruction, and a sparse mixture of experts backbone. We compare pretraining on human speech motor recordings, a language associated cortical control, NHP motor recordings, and mixed human and NHP recordings. Across speech, handwriting, and reaching, models pretrained across species consistently outperform models trained from scratch. Furthermore, we show that cross species pretraining is capacity dependent, with its clearest benefits observed in smaller speech models and handwriting models adapted with intermediate amounts of labeled target data.
     </p>
   </section>
 
@@ -376,30 +358,7 @@
   <section id="findings">
     <h2>Key Findings</h2>
     <div class="finding">
-      <strong>Fine-tuning recipe &gt; architecture, at first glance.</strong> The single largest
-      lever in this study wasn't a model change &mdash; it was replacing a frozen/gradual-unfreeze
-      transfer recipe with a conventional one (whole model trainable from step one). The same
-      checkpoints went from <em>losing</em> to scratch training on every benchmark, to <em>beating</em>
-      it, purely from that recipe change.
-    </div>
-    <div class="finding">
-      <strong>Tokenization must match the task's timescale.</strong> Native 10&nbsp;ms tokenization
-      (<code>patch_size=1</code>) roughly doubled H2 handwriting accuracy over coarse 320&nbsp;ms
-      patches, but hurt long-sequence CTC decoding on small data. Overlapping-window tokenization
-      (dense output, wide per-token context) was the decisive fix for T12 speech decoding instead.
-    </div>
-    <div class="finding warn">
-      <strong>Single-seed point estimates can mislead.</strong> T12's baseline showed 6&times; the
-      variance (SD 0.015) of either architecture ablation (SD 0.002&ndash;0.004) at 6M &mdash; a
-      single run there would have been a poor guide to which architecture is actually better.
-    </div>
-    <div class="finding">
-      <strong>No pretraining pool is universally best.</strong> Across the full 45-cell pool&times;size
-      sweep, pool <strong>C</strong> is the most consistently strong (top-2 on nearly every
-      benchmark/size) and pool <strong>B</strong> the most consistently weak, but the single best
-      pool for a given benchmark still changes with model size &mdash; e.g. Flint's best pool moves
-      D&nbsp;(10M)&rarr;A&nbsp;(45M). Every pool beats Scratch everywhere, with zero exceptions across
-      all 45 cells.
+      <strong>Cross-species pretraining provides conditional rather than universal benefits for intracortical decoding.</strong> Its strongest effect occurs for handwriting under restricted supervision, while speech depends on model capacity and NHP reaching primarily benefits from pretrained initialization rather than species mixing itself. These results establish task, capacity, supervision, and source composition as interacting design variables that must be reported jointly when evaluating cross-species neural foundation models.
     </div>
   </section>
 
